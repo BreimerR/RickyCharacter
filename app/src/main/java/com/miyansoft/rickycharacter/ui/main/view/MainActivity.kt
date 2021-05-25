@@ -1,6 +1,7 @@
 package com.miyansoft.rickycharacter.ui.main.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -21,11 +22,8 @@ import com.miyansoft.rickycharacter.utils.Status
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewModel : MainViewModel
-    private lateinit var adapter : MainAdapter
-
-
-
+    private lateinit var viewModel: MainViewModel
+    private lateinit var adapter: MainAdapter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,8 +36,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpViewModel() {
-         viewModel = ViewModelProviders.of(this,
-                ViewModelFactory(ApiHelper(RetrofitBuilder.apiService))).get(MainViewModel::class.java)
+        viewModel = ViewModelProviders.of(
+            this,
+            ViewModelFactory(ApiHelper(RetrofitBuilder.apiService))
+        ).get(MainViewModel::class.java)
     }
 
     private fun setUpUI() {
@@ -49,10 +49,10 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = MainAdapter(arrayListOf())
         recyclerView.addItemDecoration(
-                DividerItemDecoration(
-                        recyclerView.context,
-                        (recyclerView.layoutManager as LinearLayoutManager).orientation
-                )
+            DividerItemDecoration(
+                recyclerView.context,
+                (recyclerView.layoutManager as LinearLayoutManager).orientation
+            )
         )
         recyclerView.adapter = adapter
 
@@ -64,19 +64,23 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         val progressBar = findViewById<ProgressBar>(R.id.progressBar)
 
-        viewModel.getUsers().observe(this, Observer {
+
+
+        viewModel.users.observe(this) {
             it?.let { resource ->
-                when (resource.status)  {
+                when (resource.status) {
                     Status.SUCCESS -> {
                         recyclerView.visibility = View.VISIBLE
                         progressBar.visibility = View.GONE
-                        resource.data?.let { users -> retrieveList(users) }
+                        Log.d("Success", "setUpObservers: success")
+                        resource.data?.let { users ->
+                            retrieveList(users.results)
+                        }
                     }
 
                     Status.ERROR -> {
                         recyclerView.visibility = View.VISIBLE
                         progressBar.visibility = View.GONE
-                        Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
                     }
                     Status.LOADING -> {
                         progressBar.visibility = View.VISIBLE
@@ -84,7 +88,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        })
+        }
+
     }
 
     private fun retrieveList(users: List<User>) {

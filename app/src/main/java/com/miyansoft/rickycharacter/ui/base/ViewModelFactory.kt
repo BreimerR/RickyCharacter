@@ -11,7 +11,7 @@ class ViewModelFactory(private val apiHelper: ApiHelper) : ViewModelProvider.Fac
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
             return MainViewModel(MainRepository(apiHelper)) as T
         }
-                throw IllegalArgumentException("unknown class name")
-            }
-        }
+        throw IllegalArgumentException("unknown class name")
+    }
+}
 
